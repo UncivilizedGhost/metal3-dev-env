@@ -373,6 +373,10 @@ export IRSO_IMAGE=${IRSO_IMAGE:-"${CONTAINER_REGISTRY}/metal3-io/ironic-standalo
 # iPXE vars of ironic-image
 export BUILD_IPXE="${BUILD_IPXE:-false}"
 export IPXE_ENABLE_TLS="${IPXE_ENABLE_TLS:-false}"
+# Force iPXE to negotiate TLS 1.3 as the maximum version. Requires
+# IPXE_ENABLE_TLS=true and an iPXE source new enough to define
+# TLS_VERSION_TLS_1_3 (set IPXE_RELEASE_BRANCH=master; v1.21.1 has no TLS 1.3).
+export IPXE_ENABLE_TLS13="${IPXE_ENABLE_TLS13:-false}"
 export IPXE_ENABLE_IPV6="${IPXE_ENABLE_IPV6:-false}"
 export IPXE_RELEASE_BRANCH="${IPXE_RELEASE_BRANCH:-v1.21.1}"
 export IPXE_SOURCE_FORCE_UPDATE="${IPXE_SOURCE_FORCE_UPDATE:-false}"

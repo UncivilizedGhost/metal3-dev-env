@@ -208,8 +208,19 @@ fi
 
 network_address INITIAL_BARE_METAL_PROVISIONER_BRIDGE_IP "$BARE_METAL_PROVISIONER_NETWORK" 9
 
-export DEPLOY_KERNEL_URL="${DEPLOY_KERNEL_URL:-http://${CLUSTER_BARE_METAL_PROVISIONER_HOST}:${HTTP_PORT}/images/ironic-python-agent.kernel}"
-export DEPLOY_RAMDISK_URL="${DEPLOY_RAMDISK_URL:-http://${CLUSTER_BARE_METAL_PROVISIONER_HOST}:${HTTP_PORT}/images/ironic-python-agent.initramfs}"
+# When Ironic TLS is enabled, the ironic-image httpd denies the /images
+# directory over plain HTTP (unless HTTPD_SERVE_NODE_IMAGES=true), so a plain
+# http:// deploy kernel/ramdisk URL fails Ironic's pre-flight validation with
+# HTTP 403 and inspection never starts. Use file:// URLs in that case: Ironic
+# reads the IPA kernel/initramfs directly off the shared volume, which does not
+# depend on the httpd access rules. Over plain HTTP (no TLS) keep the http URLs.
+if [ "${IRONIC_TLS_SETUP}" == "true" ]; then
+  export DEPLOY_KERNEL_URL="${DEPLOY_KERNEL_URL:-file:///shared/html/images/ironic-python-agent.kernel}"
+  export DEPLOY_RAMDISK_URL="${DEPLOY_RAMDISK_URL:-file:///shared/html/images/ironic-python-agent.initramfs}"
+else
+  export DEPLOY_KERNEL_URL="${DEPLOY_KERNEL_URL:-http://${CLUSTER_BARE_METAL_PROVISIONER_HOST}:${HTTP_PORT}/images/ironic-python-agent.kernel}"
+  export DEPLOY_RAMDISK_URL="${DEPLOY_RAMDISK_URL:-http://${CLUSTER_BARE_METAL_PROVISIONER_HOST}:${HTTP_PORT}/images/ironic-python-agent.initramfs}"
+fi
 export DEPLOY_ISO_URL=${DEPLOY_ISO_URL:-}
 
 if [ "${IRONIC_TLS_SETUP}" == "true" ]; then

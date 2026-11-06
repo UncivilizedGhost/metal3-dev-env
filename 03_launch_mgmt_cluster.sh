@@ -754,6 +754,7 @@ build_ipxe_firmware()
     local ipxe_builder_image="${REGISTRY}/localimages/ipxe-builder:latest"
     local ipxe_tmp_source="/tmp/ipxe-source"
     export IPXE_ENABLE_TLS_CENV_ARG="IPXE_ENABLE_TLS='false'"
+    export IPXE_ENABLE_TLS13_CENV_ARG="IPXE_ENABLE_TLS13='false'"
     export IPXE_ENABLE_IPV6_CENV_ARG="IPXE_ENABLE_IPV6='false'"
     declare -a certs_mounts=()
 
@@ -777,6 +778,11 @@ build_ipxe_firmware()
 
     if [[ "${IPXE_ENABLE_TLS}" = "true" ]]; then
         export IPXE_ENABLE_TLS_CENV_ARG="IPXE_ENABLE_TLS=true"
+        # TLS 1.3 only makes sense when TLS is enabled; the builder writes a
+        # config/local/crypto.h override pinning TLS_VERSION_MAX to TLS 1.3.
+        if [[ "${IPXE_ENABLE_TLS13}" = "true" ]]; then
+            export IPXE_ENABLE_TLS13_CENV_ARG="IPXE_ENABLE_TLS13=true"
+        fi
         certs_mounts+=("-v ${IPXE_CACERT_FILE}:/certs/ca/ipxe/tls.crt")
         certs_mounts+=("-v ${IPXE_CERT_FILE}:/certs/ipxe/tls.crt")
         certs_mounts+=("-v ${IPXE_KEY_FILE}:/certs/ipxe/tls.key ")
@@ -791,8 +797,10 @@ build_ipxe_firmware()
         --net host \
         --name ipxe-builder ${POD_NAME} \
         -e "${IPXE_ENABLE_TLS_CENV_ARG}" \
+        -e "${IPXE_ENABLE_TLS13_CENV_ARG}" \
         -e "${IPXE_ENABLE_IPV6_CENV_ARG}" \
         -e "IPXE_CHAIN_HOST=${IRONIC_HOST_IP}" \
+        -e "IPXE_RELEASE_BRANCH=${IPXE_RELEASE_BRANCH}" \
         ${certs_mounts[@]} \
         -v "${IRONIC_DATA_DIR}":/shared \
         "${ipxe_builder_image}"

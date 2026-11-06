@@ -200,6 +200,21 @@
 # Secure Ironic deployment with TLS ("true" or "false")
 #export IRONIC_TLS_SETUP="true"
 
+# Build a custom iPXE firmware with TLS 1.3 forced on, via the ipxe-builder
+# init container. All four of these are required together:
+#   - BUILD_IPXE=true           build custom firmware during deployment
+#   - IPXE_ENABLE_TLS=true      enable HTTPS/TLS in the firmware
+#   - IPXE_ENABLE_TLS13=true    pin TLS_VERSION_MAX to TLS 1.3
+#   - IPXE_RELEASE_BRANCH=master  v1.21.1 does NOT define TLS 1.3
+# Point the builder at the local (modified) utility-images source so the
+# TLS13-aware buildipxe.sh is used:
+#   - IPXE_BUILDER_LOCAL_IMAGE=/path/to/utility-images/ipxe-builder
+#export BUILD_IPXE="true"
+#export IPXE_ENABLE_TLS="true"
+#export IPXE_ENABLE_TLS13="true"
+#export IPXE_RELEASE_BRANCH="master"
+#export IPXE_BUILDER_LOCAL_IMAGE="${HOME}/Code/utility-images/ipxe-builder"
+
 # Set nodeDrainTimeoutSeconds for controlplane and worker template, otherwise default value will be  '0'.
 #
 #export NODE_DRAIN_TIMEOUT=${NODE_DRAIN_TIMEOUT:-"0"}
